@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="本命实验室：从玩家偏好出发，探索英雄、位置与海克斯流派，找到适合自己的游戏方式。"><meta name="application-name" content="main-lab">
+  <title>本命实验室 · Main Lab</title><link rel="icon" type="image/png" href="./assets/brand-avatar.png"><link rel="stylesheet" href="./style.css">
+</head>
+<body data-game="lol">
+  <div class="world-backdrop" aria-hidden="true"><img id="world-image-a" class="world-image" alt=""><img id="world-image-b" class="world-image" alt=""><div class="world-shade"></div></div>
+  <header class="site-header">
+    <a class="brand" href="./"><img src="./assets/brand-avatar.png" alt="本命实验室头像"><span>本命实验室<small>MAIN LAB</small></span></a>
+    <div class="header-end"><span class="live-dot"></span><span>你的偏好，你的主场</span><a href="#method">关于实验室 ↗</a></div>
+  </header>
+  <main>
+    <section class="hero">
+      <div><div class="eyebrow">FIND YOUR MAIN. OWN YOUR GAME.</div><h1>下一局，<br>找到你的<span>本命。</span></h1><p class="hero-copy" id="hero-copy">从你享受的游戏瞬间出发。<br>找到想练的英雄、适合的位置，以及让你上头的海克斯流派。</p><div class="hero-meta"><span>12 道有画面的情境题</span><span>中国平台学习入口</span><span>浏览器本地计算</span></div></div>
+      <div class="hero-brand"><img src="./assets/brand-avatar.png" alt="蓝紫色龙凤与方向键组成的本命实验室图标"><div class="scene-tag"><span>NOW EXPLORING</span><strong id="scene-name">英雄联盟</strong></div></div>
+    </section>
+    <div class="layout">
+      <section class="panel" id="workspace">
+        <nav class="steps" aria-label="测试步骤"><span id="step1" class="active"><b>01</b> 选择主场</span><span id="step2"><b>02</b> 了解偏好</span><span id="step3"><b>03</b> 发现本命</span></nav>
+        <div id="setup">
+          <div class="eyebrow">CHOOSE YOUR WORLD</div><h2>今天，想走进哪个世界？</h2><p class="muted">选择游戏，主界面会切换到对应的世界。也支持中文名、英文名与常用简称。</p>
+          <label for="game">游戏名称</label><input id="game" placeholder="英雄联盟 / LOL / 王者 / FF14" autocomplete="off"><div class="game-grid" id="game-chips"></div><div id="game-status" role="status" class="status"></div>
+          <div class="form-grid"><div><label for="mbti">已有 MBTI <span class="label-note">选填</span></label><select id="mbti"><option value="">暂不填写 / 不知道</option></select></div><div><label for="time">通常一次玩多久？</label><select id="time"><option value="short">30 分钟以内</option><option value="medium" selected>30–90 分钟</option><option value="long">90 分钟以上</option></select></div></div>
+          <section id="lol-context" hidden><div class="subheading"><span class="eyebrow">BEFORE THE MATCH</span><h3>让建议落到你真实的一局。</h3><p class="muted">回答这些实际条件，我们会同时生成峡谷排位和海克斯大乱斗两份建议。</p></div><div class="form-grid context-grid" id="context-fields"></div></section>
+          <div id="setup-error" role="alert" class="status error"></div><button class="primary full" id="start">进入偏好探索 <span>↗</span></button><button class="text-button" id="example">先看一份完整的双模式示例 →</button><p class="fine">英雄联盟支持英雄与流派细分；其他游戏暂提供基础玩法方向。MBTI 作为个人备注。</p>
+        </div>
+        <div id="quiz" hidden>
+          <div class="question-top"><span class="eyebrow">PLAY YOUR WAY</span><span id="counter"></span></div><progress id="progress" max="12" value="0"></progress>
+          <figure class="question-visual"><img id="question-image" alt=""><figcaption id="question-caption"></figcaption></figure>
+          <h2 id="question" tabindex="-1"></h2><p class="muted">回想最近的游戏体验，选最接近你的感受。</p><div id="answers" role="group" aria-labelledby="question"></div>
+          <div class="actions"><button id="back" class="secondary">← 上一步</button><button id="next" class="primary" disabled>下一题 →</button></div><p class="fine">配图用于帮助进入游戏情境。问卷是探索性偏好题，不评定技术水平或心理健康。</p>
+        </div>
+        <div id="results" hidden>
+          <div class="eyebrow">YOUR MAIN, YOUR WAY</div><h2 id="result-title" tabindex="-1"></h2><p id="result-summary" class="muted"></p><p id="example-notice" class="notice" hidden>这是预设答案生成的示例报告。点击“重新探索”，填写属于你自己的偏好。</p>
+          <div id="lol-results"></div><div id="hextech-results"></div><div id="recommendations"></div>
+          <details id="profile-details" class="method-details"><summary>查看我的六维游戏偏好</summary><div id="profile"></div></details><p id="session-tip" class="muted"></p>
+          <div class="actions result-actions"><button id="restart" class="secondary">重新探索</button><button id="adjust" class="secondary">调整条件</button><button id="download" class="primary">保存完整报告 ↓</button></div><p class="fine">推荐依据是偏好与玩法的匹配，实际试玩感受可以随时推翻标签。</p>
+        </div>
+      </section>
+      <aside class="lab-notes"><span class="eyebrow">A NOTE FROM THE LAB</span><h2>你可以有<br>不止一个本命。</h2><p>一套偏好，两种战场。<br>在需要稳定的峡谷里找到位置，<br>在充满变数的大乱斗里找到乐趣。</p><div class="note-item"><b>01</b><div><h3>峡谷 · 排位</h3><p>位置、英雄池、练习路线。<br>把“想上分”拆成下一步。</p></div></div><div class="note-item"><b>02</b><div><h3>海克斯 · 大乱斗</h3><p>英雄、流派、强化取舍。<br>根据你实际拿到的牌调整。</p></div></div><div class="note-item"><b>03</b><div><h3>看高手，学具体的事</h3><p>职业选手与主播分开推荐，<br>通过 B站等中国平台继续探索。</p></div></div><a href="#method" class="text-link">了解推荐方式 ↗</a></aside>
+    </div>
+    <section class="method" id="method"><div><span class="eyebrow">THE METHOD</span><h2>性格是线索，<br>体验是答案。</h2></div><div><p>本命实验室结合协作、风险、操作节奏、贡献方式、探索和练习意愿，提供可解释的玩法建议。峡谷与海克斯使用独立的推荐逻辑；内容中的游戏机制、个人偏好和编辑建议会注明来源。</p><p class="fine">问卷与规则仍处于探索阶段。海克斯的出现、强度和组合会随版本变化，请根据当前客户端和实际拿到的强化调整。</p></div></section>
+    <div class="visual-credit"><span>WORLD ART / 游戏场景</span><a id="scene-source" target="_blank" rel="noopener noreferrer">查看当前背景来源 ↗</a></div>
+  </main>
+  <footer><div class="footer-brand">本命实验室 <span>MAIN LAB</span></div><p>问卷在本地计算 · 视频与资料在中国平台打开 · 游戏美术归相应权利方所有</p><small>Main Lab is not endorsed by Riot Games and does not reflect the views or opinions of Riot Games or anyone officially involved in producing or managing Riot Games properties. Riot Games and all associated properties are trademarks or registered trademarks of Riot Games, Inc.</small></footer>
+  <script type="module" src="./app.js"></script>
+</body></html>

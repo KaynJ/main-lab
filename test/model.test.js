@@ -1,0 +1,9 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {findGame,profile,recommend,games} from '../web/model.js';
+test('recognizes names despite width, punctuation and case, rejects unsupported games',()=>{assert.equal(findGame(' ＬＯＬ ' ).id,'lol');assert.equal(findGame('Final Fantasy unknown'),null);assert.equal(findGame('FF-14').id,'ffxiv');assert.equal(findGame('英雄联盟').id,'lol');assert.equal(findGame(''),null);});
+test('neutral responses remain neutral and incomplete answers cannot be scored',()=>{assert.deepEqual(Object.values(profile(Array(12).fill(3))),Array(6).fill(50));assert.throws(()=>profile(Array(12).fill(null)));assert.throws(()=>profile([1,2]));});
+test('reverse-coded answers correctly distinguish opposite player preferences',()=>{const p=profile([5,5,5,5,5,5,1,1,1,1,5,1]);assert.deepEqual(Object.values(p),Array(6).fill(100));const q=profile([1,1,1,1,1,1,5,5,5,5,1,5]);assert.deepEqual(Object.values(q),Array(6).fill(0));});
+test('support and breakthrough preferences produce different FPS recommendations',()=>{const game=findGame('瓦');assert.equal(recommend(game,game.roles[0].tags)[0].name,'信息与支援');assert.equal(recommend(game,game.roles[1].tags)[0].name,'突破与先手');});
+test('each supported game returns three bounded and explainable results',()=>{for(const game of games){const results=recommend(game,profile(Array(12).fill(3)));assert.equal(results.length,3);for(const r of results){assert.ok(r.score>=0&&r.score<=100);assert.equal(r.reasons.length,2);assert.ok(r.trial&&r.caution);}}});
+test('neutral preferences are not explained as a strong directional preference',()=>{for(const r of recommend(games[0],profile(Array(12).fill(3))))assert.ok(r.reasons.every(m=>m.preference==='随情境变化'));});
