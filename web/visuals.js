@@ -1,5 +1,7 @@
 // Official game artwork, stored locally for reliable previews. See docs/visual-sources.md.
+import {deltaGameVisual} from './delta-visuals.js';
 export const gameVisuals = {
+  delta: deltaGameVisual,
   lol: {
     name: '召唤师峡谷', url: './assets/background-lol.jpg',
     alt: '英雄联盟召唤师峡谷全景：河道、野区和双方基地构成完整战场。',

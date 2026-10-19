@@ -3,6 +3,9 @@ import {contextFields,lanes,recommendLol,validateContext,lolMarkdown,sources,REV
 import {tutorials,observersByLane} from './lol-media.js';
 import {hextechHeroes,recommendHextech,hextechMarkdown} from './hextech.js';
 import {gameVisuals,questionVisuals} from './visuals.js';
+import {deltaContextFields,deltaQuestions,validateDeltaContext,recommendDelta,deltaMarkdown} from './delta.js';
+import {deltaQuestionVisuals} from './delta-visuals.js';
+import {renderDeltaReport} from './delta-ui.js';
 
 const $=id=>document.getElementById(id);
 const el=(tag,text,cls)=>{const node=document.createElement(tag);if(text!==undefined)node.textContent=text;if(cls)node.className=cls;return node;};
@@ -11,6 +14,9 @@ const isChinaPlatform=url=>{try{const host=new URL(url).hostname;return ['bilibi
 const mediaLink=(text,url)=>isChinaPlatform(url)?link(text,url):el('span','中国平台资料整理中','fine');
 let selectedGame=null,index=0,answers=Array(questions.length).fill(null),report=null,isExample=false,rolledHeroId='auto';
 let visualGame=null,activeWorld=0,worldRequest=0;
+let questionBank='generic';
+const labNotes=document.querySelector('.lab-notes');
+const originalLabNotes=labNotes.innerHTML;
 
 function applyWorld(game){
  if(!game||visualGame===game.id)return;
@@ -24,7 +30,7 @@ function applyWorld(game){
  layers[next].src=visual.url;
 }
 for(const game of games){
- const button=el('button',undefined,'game-chip');button.dataset.game=game.id;button.append(el('strong',game.name),el('small',game.id==='lol'?'RANKED + HEXTECH':game.kind));
+ const button=el('button',undefined,'game-chip');button.dataset.game=game.id;button.append(el('strong',game.name),el('small',game.id==='lol'?'RANKED + HEXTECH':game.id==='delta'?'OPERATORS + LOADOUT':game.kind));
  button.onclick=()=>{$('game').value=game.name;resolve();};$('game-chips').append(button);
 }
 for(const a of ['I','E'])for(const b of ['N','S'])for(const c of ['T','F'])for(const d of ['J','P'])$('mbti').append(new Option(a+b+c+d,a+b+c+d));
@@ -34,28 +40,50 @@ for(const field of contextFields){
  const select=el('select');select.id=label.htmlFor;select.append(new Option('请选择',''));for(const [value,text] of field.options)select.append(new Option(text,value));
  box.append(label);if(visual){const img=el('img');img.src=visual.url;img.alt='';img.className='field-visual';img.loading='lazy';box.append(img);}box.append(select);$('context-fields').append(box);
 }
+for(const [i,field] of deltaContextFields.entries()){
+ const box=el('div');const label=el('label',field.label);label.htmlFor=`delta-${field.id}`;
+ const select=el('select');select.id=label.htmlFor;if(!field.default)select.append(new Option('请选择',''));
+ for(const [value,text] of field.options)select.append(new Option(text,value));if(field.default)select.value=field.default;
+ const img=el('img');img.src=deltaQuestionVisuals[[0,5,7,9,5,0,4,2,4,8][i]].url;img.alt='';img.loading='lazy';img.className='field-visual';
+ box.append(label,img,select);if(field.help)box.append(el('p',field.help,'fine'));$('delta-context-fields').append(box);
+}
+function syncDeltaControls(){
+ const warfare=$('delta-mode').value==='warfare';$('delta-budget').disabled=warfare;$('delta-season').disabled=warfare;
+}
+$('delta-mode').addEventListener('change',syncDeltaControls);syncDeltaControls();
+function renderLabNotes(game){
+ if(game?.id!=='delta'){labNotes.innerHTML=originalLabNotes;return;}
+ labNotes.replaceChildren(el('span','A NOTE FROM THE LAB','eyebrow'),el('h2','先找到你想打的位置。'),el('p','用实际偏好挑选干员与枪械，再让三次试玩来验证。'));
+ [['01','四种兵种，一起比较','突破、信息、工程和救援，每种贡献都有自己的反馈。'],['02','同一干员，也有不同打法','距离、队伍和操作投入，会改变适合你的行动路线。'],['03','枪械观点，带上赛季','参考 ALWAYS聪聪本人视频，保留改装、平台和版本条件。']].forEach(([n,title,text])=>{const row=el('div',undefined,'note-item'),copy=el('div');copy.append(el('h3',title),el('p',text));row.append(el('b',n),copy);labNotes.append(row);});
+ const a=el('a','了解推荐方式 ↗','text-link');a.href='#method';labNotes.append(a);
+}
 function resolve(){
  selectedGame=findGame($('game').value);
- $('game-status').textContent=selectedGame?`${selectedGame.name} · ${selectedGame.id==='lol'?'峡谷排位 + 海克斯大乱斗双模式':'基础玩法探索'}`:($('game').value.trim()?'暂未收录这个名称，请选择上方游戏。':'选择一个主场，开始探索。');
- $('game-status').className=selectedGame||!$('game').value.trim()?'status':'status error';$('lol-context').hidden=selectedGame?.id!=='lol';$('setup-error').textContent='';
+ const nextBank=selectedGame?.id==='delta'?'delta':'generic';if(selectedGame&&questionBank!==nextBank){questionBank=nextBank;index=0;answers=Array(questions.length).fill(null);report=null;isExample=false;}
+ $('game-status').textContent=selectedGame?`${selectedGame.name} · ${selectedGame.id==='lol'?'峡谷排位 + 海克斯大乱斗双模式':selectedGame.id==='delta'?'17 位干员 / 四兵种 / 枪械与赛季资料':'基础玩法探索'}`:($('game').value.trim()?'暂未收录这个名称，请选择上方游戏。':'选择一个主场，开始探索。');
+ $('game-status').className=selectedGame||!$('game').value.trim()?'status':'status error';$('lol-context').hidden=selectedGame?.id!=='lol';$('delta-context').hidden=selectedGame?.id!=='delta';$('setup-error').textContent='';
  for(const button of $('game-chips').children){const selected=button.dataset.game===selectedGame?.id;button.classList.toggle('selected',selected);button.setAttribute('aria-pressed',String(selected));}
- if(selectedGame)$('hero-copy').textContent=selectedGame.id==='lol'?'从你享受的游戏瞬间出发。找到想练的英雄、适合的位置，以及让你上头的海克斯流派。':`从你享受的游戏瞬间出发，探索${selectedGame.name}里的角色定位与玩法，找到更想投入的一种。`;
+ if(selectedGame)$('hero-copy').textContent=selectedGame.id==='lol'?'从你享受的游戏瞬间出发。找到想练的英雄、适合的位置，以及让你上头的海克斯流派。':selectedGame.id==='delta'?'你更想突破、报点、架枪，还是救起队友？从距离与玩法偏好出发，找到想练的干员、枪械和行动路线。':`从你享受的游戏瞬间出发，探索${selectedGame.name}里的角色定位与玩法，找到更想投入的一种。`;
+ $('example').textContent=selectedGame?.id==='delta'?'先看一份三角洲完整示例 →':'先看一份完整的双模式示例 →';renderLabNotes(selectedGame);
  applyWorld(selectedGame);return selectedGame;
 }
-$('game').addEventListener('input',resolve);$('game').value='英雄联盟';resolve();
+$('game').addEventListener('input',resolve);$('game').value='三角洲行动';resolve();
 const context=()=>({...Object.fromEntries(contextFields.map(f=>[f.id,$(`ctx-${f.id}`).value])),time:$('time').value});
+const deltaContext=()=>({...Object.fromEntries(deltaContextFields.map(f=>[f.id,$(`delta-${f.id}`).value])),time:$('time').value});
 function screen(name){
  for(const id of ['setup','quiz','results'])$(id).hidden=id!==name;
  ['step1','step2','step3'].forEach((id,i)=>$(id).classList.toggle('active',i===['setup','quiz','results'].indexOf(name)));
- document.body.classList.toggle('showing-results',name==='results'&&selectedGame?.id==='lol');
+ document.body.classList.toggle('showing-results',name==='results'&&['lol','delta'].includes(selectedGame?.id));
 }
 $('start').onclick=()=>{
  if(!resolve()){$('game').focus();return;}
  if(selectedGame.id==='lol')try{validateContext(context());}catch(error){$('setup-error').textContent=error.message;const missing=contextFields.find(f=>!$(`ctx-${f.id}`).value);if(missing)$(`ctx-${missing.id}`).focus();return;}
+ if(selectedGame.id==='delta')try{validateDeltaContext(deltaContext());}catch(error){$('setup-error').textContent=error.message;const missing=deltaContextFields.find(f=>!$(`delta-${f.id}`).value);if(missing)$(`delta-${missing.id}`).focus();return;}
  if(answers.every(x=>x!==null)){renderResults();return;}screen('quiz');renderQuestion();
 };
 function renderQuestion(){
- const visual=questionVisuals[index];$('question').textContent=questions[index][1];$('counter').textContent=`${String(index+1).padStart(2,'0')} / ${questions.length}`;$('progress').value=answers.filter(x=>x!==null).length;
+ const activeQuestions=selectedGame.id==='delta'?deltaQuestions:questions;
+ const visual=(selectedGame.id==='delta'?deltaQuestionVisuals:questionVisuals)[index];$('question').textContent=activeQuestions[index][1];$('counter').textContent=`${String(index+1).padStart(2,'0')} / ${activeQuestions.length}`;$('progress').value=answers.filter(x=>x!==null).length;
  $('question-image').src=visual.url;$('question-image').alt=visual.alt;$('question-caption').textContent=visual.caption||'游戏情境示意';
  $('answers').replaceChildren();['非常不同意','比较不同意','不确定 / 看情境','比较同意','非常同意'].forEach((label,i)=>{
   const button=el('button',label,'answer'+(answers[index]===i+1?' selected':''));button.append(el('span',String(i+1)));button.setAttribute('aria-pressed',String(answers[index]===i+1));
@@ -128,19 +156,35 @@ function renderProfile(traits){
 }
 function renderResults(focus=true){
  const traits=profile(answers),lol=selectedGame.id==='lol'?recommendLol(traits,context()):null,hextech=lol?recommendHextech(traits,context(),rolledHeroId):null;
- report={version:'0.3.0',game:selectedGame.name,mbtiNote:$('mbti').value||null,session:$('time').value,traits,recommendations:recommend(selectedGame,traits),lol,hextech,isExample,method:'探索性游戏偏好问卷；编辑规则推荐；MBTI仅作个人备注。'};
- screen('results');$('example-notice').hidden=!isExample;$('result-title').textContent=lol?'你的本命报告 · 两种战场，两份路线':`你的本命报告 · ${selectedGame.name}`;$('result-summary').textContent=lol?'先看峡谷排位中的位置与英雄池，再探索海克斯大乱斗的英雄和流派。':'从你的偏好出发，比较值得尝试的玩法方向。';renderProfile(traits);$('recommendations').replaceChildren();$('lol-results').replaceChildren();$('hextech-results').replaceChildren();
- if(lol){renderRanked(lol);renderHextech(hextech);}else{
+ const delta=selectedGame.id==='delta'?recommendDelta(traits,deltaContext(),$('mbti').value):null;
+ report={version:'0.4.0',game:selectedGame.name,mbtiNote:$('mbti').value||null,session:$('time').value,traits,recommendations:lol||delta?[]:recommend(selectedGame,traits),lol,hextech,delta,isExample,method:delta?delta.method:'探索性游戏偏好问卷；编辑规则推荐；MBTI仅作个人备注。'};
+ screen('results');$('example-notice').hidden=!isExample;$('result-title').textContent=lol?'你的本命报告 · 两种战场，两份路线':`你的本命报告 · ${selectedGame.name}`;$('result-summary').textContent=lol?'先看峡谷排位中的位置与英雄池，再探索海克斯大乱斗的英雄和流派。':delta?'先找到想承担的分工，再比较干员、交战距离与枪械；用三次试玩检验这份建议。':'从你的偏好出发，比较值得尝试的玩法方向。';renderProfile(traits);$('recommendations').replaceChildren();$('lol-results').replaceChildren();$('hextech-results').replaceChildren();$('delta-results').replaceChildren();
+ if(delta){
+  const update=(key,value)=>{$(`delta-${key}`).value=value;syncDeltaControls();renderResults(false);$('delta-results').scrollIntoView({block:'start'});};
+  $('delta-results').append(renderDeltaReport(delta,{onRoleChange:id=>update('role',id),onModeChange:mode=>update('mode',mode),onSeasonChange:id=>update('season',id)}));
+ }else if(lol){renderRanked(lol);renderHextech(hextech);}else{
   $('recommendations').append(el('p','这款游戏暂为基础方向版，英雄与职业细分正在扩充。','basic-note'));
   report.recommendations.forEach((r,i)=>{const card=el('article',undefined,'rec');card.append(el('div',`值得尝试的方向 0${i+1}`,'rank'),el('h3',r.name),el('p',`偏好线索：${r.reasons.map(m=>`${m.label}上${m.preference}`).join('；')}。`),el('p',r.caution),el('p',`试玩任务：${r.trial}`,'trial'));$('recommendations').append(card);});
  }
- $('session-tip').textContent=lol?'':'一次先尝试一个方向，记录享受程度、压力和继续玩的意愿。';if(focus)$('result-title').focus();
+ $('session-tip').textContent=lol||delta?'':'一次先尝试一个方向，记录享受程度、压力和继续玩的意愿。';if(focus)$('result-title').focus();
 }
-$('example').onclick=()=>{isExample=true;rolledHeroId='auto';$('game').value='英雄联盟';resolve();$('time').value='medium';const demo={experience:'regular',mechanics:'medium',goal:'climb',party:'duo',lane:'support',style:'protect',macro:'medium',range:'ranged'};for(const [key,value] of Object.entries(demo))$(`ctx-${key}`).value=value;answers=[5,1,2,5,3,2,1,5,4,1,3,4];renderResults();};
+$('example').onclick=()=>{
+ rolledHeroId='auto';$('time').value='medium';
+ if(selectedGame?.id==='delta'){
+  const demo={mode:'operations',platform:'pc',range:'long',style:'intel',mechanics:'medium',party:'duo',budget:'balanced',role:'auto',season:'latest-verified',mbtiUse:'light'};
+  for(const [key,value] of Object.entries(demo))$(`delta-${key}`).value=value;$('mbti').value='INTJ';syncDeltaControls();
+ }else{
+  $('game').value='英雄联盟';resolve();const demo={experience:'regular',mechanics:'medium',goal:'climb',party:'duo',lane:'support',style:'protect',macro:'medium',range:'ranged'};for(const [key,value] of Object.entries(demo))$(`ctx-${key}`).value=value;
+ }
+ isExample=true;answers=[5,1,2,5,3,2,1,5,4,1,3,4];renderResults();
+};
 $('adjust').onclick=()=>{screen('setup');$('start').textContent='用这些条件更新建议 ↗';$('game').focus();};
-$('restart').onclick=()=>{isExample=false;rolledHeroId='auto';index=0;answers=Array(questions.length).fill(null);report=null;$('start').textContent='进入偏好探索 ↗';screen('setup');$('game').focus();};
+$('restart').onclick=()=>{
+ if(isExample&&selectedGame?.id==='delta'){$('mbti').value='';for(const field of deltaContextFields)$(`delta-${field.id}`).value=field.default||'';syncDeltaControls();}
+ isExample=false;rolledHeroId='auto';index=0;answers=Array(questions.length).fill(null);report=null;$('start').textContent='进入偏好探索 ↗';screen('setup');$('game').focus();
+};
 $('download').onclick=()=>{
  if(!report)return;const head=`# 本命实验室 · ${report.game}本命报告\n\nMAIN LAB / ${report.version}\n\n${report.isExample?'示例报告：预设答案，并非个人测评。\n\n':''}${report.method}\n\nMBTI 备注：${report.mbtiNote||'未填写'}\n\n`;
- const text=head+(report.lol?lolMarkdown(report.lol)+'\n\n'+hextechMarkdown(report.hextech):report.recommendations.map((r,i)=>`## ${i+1}. ${r.name}\n${r.caution}\n试玩任务：${r.trial}\n`).join('\n'));
- const url=URL.createObjectURL(new Blob([text],{type:'text/markdown;charset=utf-8'})),a=el('a');a.href=url;a.download='main-lab-report.md';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+ const text=head+(report.delta?deltaMarkdown(report.delta):report.lol?lolMarkdown(report.lol)+'\n\n'+hextechMarkdown(report.hextech):report.recommendations.map((r,i)=>`## ${i+1}. ${r.name}\n${r.caution}\n试玩任务：${r.trial}\n`).join('\n'));
+ const url=URL.createObjectURL(new Blob([text],{type:'text/markdown;charset=utf-8'})),a=el('a');a.href=url;a.download=report.delta?'main-lab-delta-report.md':'main-lab-report.md';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
 };

@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {findGame,profile,recommend,games} from '../web/model.js';
 test('recognizes names despite width, punctuation and case, rejects unsupported games',()=>{assert.equal(findGame(' ＬＯＬ ' ).id,'lol');assert.equal(findGame('Final Fantasy unknown'),null);assert.equal(findGame('FF-14').id,'ffxiv');assert.equal(findGame('英雄联盟').id,'lol');assert.equal(findGame(''),null);});
+test('recognizes Delta Force Chinese, English and common abbreviations',()=>{for(const name of ['三角洲行动','三角洲','DELTA FORCE','ＤＦＭ','Delta-Force'])assert.equal(findGame(name).id,'delta');});
 test('neutral responses remain neutral and incomplete answers cannot be scored',()=>{assert.deepEqual(Object.values(profile(Array(12).fill(3))),Array(6).fill(50));assert.throws(()=>profile(Array(12).fill(null)));assert.throws(()=>profile([1,2]));});
 test('reverse-coded answers correctly distinguish opposite player preferences',()=>{const p=profile([5,5,5,5,5,5,1,1,1,1,5,1]);assert.deepEqual(Object.values(p),Array(6).fill(100));const q=profile([1,1,1,1,1,1,5,5,5,5,1,5]);assert.deepEqual(Object.values(q),Array(6).fill(0));});
 test('support and breakthrough preferences produce different FPS recommendations',()=>{const game=findGame('瓦');assert.equal(recommend(game,game.roles[0].tags)[0].name,'信息与支援');assert.equal(recommend(game,game.roles[1].tags)[0].name,'突破与先手');});

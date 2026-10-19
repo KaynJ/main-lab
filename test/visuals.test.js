@@ -13,7 +13,7 @@ test('每款已收录游戏和每道题都有不同的本地配图及来源', as
   const pictures = [...Object.values(gameVisuals), ...questionVisuals];
   const hashes = new Set();
   for (const picture of pictures) {
-    assert.match(picture.url, /^\.\/assets\/[a-z0-9-]+\.jpg$/);
+    assert.match(picture.url, /^\.\/assets\/(?:[a-z0-9-]+\/)*[a-z0-9-]+\.jpg$/);
     assert.ok(picture.alt && picture.credit);
     assert.equal(new URL(picture.source).protocol, 'https:');
     const bytes = await readFile(new URL(`../web/${picture.url.slice(2)}`, import.meta.url));

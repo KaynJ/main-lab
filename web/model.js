@@ -30,6 +30,7 @@ const shared={
 };
 export const games=[
  {id:'lol',name:'英雄联盟',aliases:['lol','league of legends','英雄联盟','撸啊撸'],kind:'MOBA',roles:shared.moba},
+ {id:'delta',name:'三角洲行动',aliases:['三角洲','三角洲行动','delta force','delta','df','dfm'],kind:'战术撤离 / 大战场',roles:shared.fps},
  {id:'hok',name:'王者荣耀',aliases:['王者','王者荣耀','honor of kings','hok'],kind:'MOBA',roles:shared.moba},
  {id:'valorant',name:'无畏契约',aliases:['无畏契约','瓦','瓦罗兰特','valorant'],kind:'战术射击',roles:shared.fps},
  {id:'ffxiv',name:'最终幻想14',aliases:['ff14','ffxiv','最终幻想14','最终幻想xiv'],kind:'MMORPG',roles:shared.rpg},
