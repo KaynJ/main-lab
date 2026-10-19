@@ -6,6 +6,8 @@ import {gameVisuals,questionVisuals} from './visuals.js';
 import {deltaContextFields,deltaQuestions,validateDeltaContext,recommendDelta,deltaMarkdown} from './delta.js';
 import {deltaQuestionVisuals} from './delta-visuals.js';
 import {renderDeltaReport} from './delta-ui.js';
+import {buildPreferenceAnalysis,analysisMarkdown} from './preference-analysis.js';
+import {renderPreferenceAnalysis} from './analysis-ui.js';
 
 const $=id=>document.getElementById(id);
 const el=(tag,text,cls)=>{const node=document.createElement(tag);if(text!==undefined)node.textContent=text;if(cls)node.className=cls;return node;};
@@ -137,7 +139,7 @@ function renderRanked(result){
 function renderHextech(result){
  const outer=$('hextech-results');outer.replaceChildren();const root=el('section',undefined,'report-section');root.id='hextech-recommendations';root.append(sectionHeading('02 / ARAM: MAYHEM','海克斯大乱斗 · 英雄与流派','同一位英雄，也可以玩出不同体验。按实际随机到的英雄、强化和阵容来调整。','HEXTECH',true));
  const controls=el('div',undefined,'hex-controls'),selectBox=el('div'),label=el('label','已经随机到哪位英雄？');label.htmlFor='rolled-hero';const select=el('select');select.id='rolled-hero';select.append(new Option('还没随机：先看适合留意的英雄','auto'));hextechHeroes.forEach(hero=>select.append(new Option(hero.name,hero.id)));select.value=rolledHeroId;
- select.onchange=()=>{rolledHeroId=select.value;report.hextech=recommendHextech(report.traits,context(),rolledHeroId);renderHextech(report.hextech);$('rolled-hero').focus({preventScroll:true});};selectBox.append(label,select);const udyr=el('button','直接看乌迪尔的两条路线 ↗','secondary');udyr.onclick=()=>{rolledHeroId='Udyr';report.hextech=recommendHextech(report.traits,context(),rolledHeroId);renderHextech(report.hextech);$('rolled-hero').focus({preventScroll:true});};controls.append(selectBox,udyr);root.append(controls);
+ select.onchange=()=>{rolledHeroId=select.value;report.hextech=recommendHextech(report.traits,context(),rolledHeroId);renderHextech(report.hextech);renderAnalysis();$('rolled-hero').focus({preventScroll:true});};selectBox.append(label,select);const udyr=el('button','直接看乌迪尔的两条路线 ↗','secondary');udyr.onclick=()=>{rolledHeroId='Udyr';report.hextech=recommendHextech(report.traits,context(),rolledHeroId);renderHextech(report.hextech);renderAnalysis();$('rolled-hero').focus({preventScroll:true});};controls.append(selectBox,udyr);root.append(controls);
  root.append(el('p',result.notes[0],'hex-note'));if(result.context.time==='short')root.append(el('p','你选择了 30 分钟以内的时段：海克斯对局不能保证准时结束，有硬性截止时间时请先选择单人练习。','notice'));
  result.picks.forEach((hero,i)=>{
   const card=el('article',undefined,'hex-hero-card');card.append(heroHeading(hero,result.rolledHeroId==='auto'?`值得留意的英雄 0${i+1}`:'本局拿到的英雄'),el('p',hero.reason,'muted'));
@@ -154,10 +156,15 @@ function renderHextech(result){
 function renderProfile(traits){
  $('profile').replaceChildren();dimensions.forEach(([id,label,low,high])=>{const row=el('div',undefined,'trait'),head=el('div');head.append(el('strong',label),el('span',traits[id]===50?'随情境变化':traits[id]>50?high:low));const meter=el('meter');meter.min=0;meter.max=100;meter.value=traits[id];meter.setAttribute('aria-label',`${label}：${low}到${high}，${traits[id]}/100`);row.append(head,meter);$('profile').append(row);});
 }
+function renderAnalysis(){
+ report.analysis=buildPreferenceAnalysis(report,answers);
+ $('preference-reading').replaceChildren(renderPreferenceAnalysis(report.analysis));
+}
 function renderResults(focus=true){
  const traits=profile(answers),lol=selectedGame.id==='lol'?recommendLol(traits,context()):null,hextech=lol?recommendHextech(traits,context(),rolledHeroId):null;
  const delta=selectedGame.id==='delta'?recommendDelta(traits,deltaContext(),$('mbti').value):null;
- report={version:'0.4.0',game:selectedGame.name,mbtiNote:$('mbti').value||null,session:$('time').value,traits,recommendations:lol||delta?[]:recommend(selectedGame,traits),lol,hextech,delta,isExample,method:delta?delta.method:'探索性游戏偏好问卷；编辑规则推荐；MBTI仅作个人备注。'};
+ report={version:'0.4.1',game:selectedGame.name,mbtiNote:$('mbti').value||null,session:$('time').value,traits,recommendations:lol||delta?[]:recommend(selectedGame,traits),lol,hextech,delta,isExample,method:delta?delta.method:'探索性游戏偏好问卷；编辑规则推荐；MBTI仅作个人备注。'};
+ renderAnalysis();
  screen('results');$('example-notice').hidden=!isExample;$('result-title').textContent=lol?'你的本命报告 · 两种战场，两份路线':`你的本命报告 · ${selectedGame.name}`;$('result-summary').textContent=lol?'先看峡谷排位中的位置与英雄池，再探索海克斯大乱斗的英雄和流派。':delta?'先找到想承担的分工，再比较干员、交战距离与枪械；用三次试玩检验这份建议。':'从你的偏好出发，比较值得尝试的玩法方向。';renderProfile(traits);$('recommendations').replaceChildren();$('lol-results').replaceChildren();$('hextech-results').replaceChildren();$('delta-results').replaceChildren();
  if(delta){
   const update=(key,value)=>{$(`delta-${key}`).value=value;syncDeltaControls();renderResults(false);$('delta-results').scrollIntoView({block:'start'});};
@@ -185,6 +192,6 @@ $('restart').onclick=()=>{
 };
 $('download').onclick=()=>{
  if(!report)return;const head=`# 本命实验室 · ${report.game}本命报告\n\nMAIN LAB / ${report.version}\n\n${report.isExample?'示例报告：预设答案，并非个人测评。\n\n':''}${report.method}\n\nMBTI 备注：${report.mbtiNote||'未填写'}\n\n`;
- const text=head+(report.delta?deltaMarkdown(report.delta):report.lol?lolMarkdown(report.lol)+'\n\n'+hextechMarkdown(report.hextech):report.recommendations.map((r,i)=>`## ${i+1}. ${r.name}\n${r.caution}\n试玩任务：${r.trial}\n`).join('\n'));
+ const text=head+analysisMarkdown(report.analysis)+'\n'+(report.delta?deltaMarkdown(report.delta):report.lol?lolMarkdown(report.lol)+'\n\n'+hextechMarkdown(report.hextech):report.recommendations.map((r,i)=>`## ${i+1}. ${r.name}\n${r.caution}\n试玩任务：${r.trial}\n`).join('\n'));
  const url=URL.createObjectURL(new Blob([text],{type:'text/markdown;charset=utf-8'})),a=el('a');a.href=url;a.download=report.delta?'main-lab-delta-report.md':'main-lab-report.md';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
 };

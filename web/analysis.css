@@ -1,0 +1,99 @@
+.preference-analysis {
+  min-width: 0;
+  margin: 25px 0 32px;
+  padding: 28px 30px;
+  border: 1px solid rgba(158, 187, 221, .3);
+  border-radius: 12px;
+  background: linear-gradient(125deg, rgba(16, 31, 43, .92), rgba(20, 20, 35, .92));
+  color: #dce4f4;
+  overflow-wrap: anywhere;
+}
+.preference-analysis-header { margin-bottom: 19px; }
+.preference-analysis-kicker {
+  margin: 0 0 10px;
+  color: #94dfe9;
+  font-size: 10px;
+  line-height: 1.8;
+  letter-spacing: 1.4px;
+}
+.preference-analysis-title {
+  margin: 0;
+  color: #f1f5ff;
+  font-size: 24px;
+  line-height: 1.6;
+  font-weight: 600;
+  letter-spacing: -.3px;
+}
+.preference-analysis-body { max-width: 76ch; }
+.preference-analysis-lead {
+  margin: 0 0 19px;
+  color: #e1edf7;
+  font-size: 17px;
+  line-height: 1.95;
+  font-weight: 500;
+}
+.preference-analysis-paragraph {
+  margin: 0 0 16px;
+  color: #bdc9de;
+  font-size: 14px;
+  line-height: 2;
+}
+.preference-analysis-body > :last-child { margin-bottom: 0; }
+.preference-analysis-evidence {
+  margin-top: 24px;
+  padding-top: 17px;
+  border-top: 1px solid rgba(178, 196, 233, .17);
+}
+.preference-analysis-summary {
+  color: #b8d9e7;
+  font-size: 13px;
+  line-height: 1.9;
+  cursor: pointer;
+}
+.preference-analysis-summary:hover { color: #f0fbff; }
+.preference-analysis-summary:focus-visible { outline: 2px solid #83f4ff; outline-offset: 5px; }
+.preference-analysis-summary::marker { color: #80c6d2; }
+.preference-analysis-evidence-list {
+  margin: 18px 0 0;
+  padding-left: 23px;
+  color: #8197b8;
+  font-size: 12px;
+  line-height: 1.9;
+}
+.preference-analysis-evidence-item { padding-left: 4px; }
+.preference-analysis-evidence-item + .preference-analysis-evidence-item { margin-top: 16px; }
+.preference-analysis-question {
+  margin: 0 0 4px;
+  color: #c4d1e5;
+  font-size: 13px;
+  line-height: 1.9;
+}
+.preference-analysis-answer {
+  margin: 0;
+  color: #91b8ce;
+  font-size: 12px;
+  line-height: 1.9;
+}
+.preference-analysis-note {
+  max-width: 92ch;
+  margin: 23px 0 0;
+  padding-left: 12px;
+  border-left: 2px solid #685e88;
+  color: #a6b0c8;
+  font-size: 12px;
+  line-height: 1.95;
+}
+@media (max-width: 600px) {
+  .preference-analysis { margin: 22px 0 27px; padding: 22px 19px; border-radius: 10px; }
+  .preference-analysis-header { margin-bottom: 15px; }
+  .preference-analysis-kicker { font-size: 9px; letter-spacing: 1px; }
+  .preference-analysis-title { font-size: 21px; }
+  .preference-analysis-lead { margin-bottom: 16px; font-size: 15px; line-height: 1.95; }
+  .preference-analysis-paragraph { margin-bottom: 15px; font-size: 13px; line-height: 2; }
+  .preference-analysis-evidence { margin-top: 21px; padding-top: 16px; }
+  .preference-analysis-summary { font-size: 12px; }
+  .preference-analysis-evidence-list { padding-left: 18px; }
+  .preference-analysis-question { font-size: 12px; }
+  .preference-analysis-answer { font-size: 12px; }
+  .preference-analysis-note { margin-top: 21px; padding-left: 10px; font-size: 12px; }
+}

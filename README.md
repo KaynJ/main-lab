@@ -2,7 +2,7 @@
 
 从玩家偏好出发，探索想练的英雄、适合的位置和愿意尝试的玩法。输入游戏、完成 12 道情境题，获得能解释原因、可以实际试玩的建议。
 
-**当前版本：0.4.0，开发中的玩家推荐工具。** 已有 [GitHub 仓库](https://github.com/KaynJ/main-lab) 和 [在线站点](https://kaynj.github.io/main-lab/)。新增三角洲行动的兵种、干员、打法和枪械报告；英雄联盟保留峡谷与海克斯双模式，其余五款游戏仍为基础玩法方向。提交并推送到 main 后自动部署，线上版本以 [Actions](https://github.com/KaynJ/main-lab/actions) 结果为准。
+**当前版本：0.4.1，开发中的玩家推荐工具。** 已有 [GitHub 仓库](https://github.com/KaynJ/main-lab) 和 [在线站点](https://kaynj.github.io/main-lab/)。三角洲行动与英雄联盟支持具体推荐；报告先解读本次作答与游玩条件，再展示干员、枪械、英雄和玩法。其余五款游戏仍为基础玩法方向。提交并推送到 main 后自动部署，线上版本以 [Actions](https://github.com/KaynJ/main-lab/actions) 结果为准。
 
 ## 本地运行
 
@@ -20,11 +20,12 @@ node launch.mjs
 npm test
 ```
 
-## 0.4.0 已实现
+## 0.4.1 已实现
 
 - **品牌与界面**：用户提供的本地头像，本命实验室 / MAIN LAB 名称，黑底白字，背景随所选游戏变化。
 - **七款游戏**：英雄联盟、三角洲行动、王者荣耀、无畏契约、最终幻想14、魔兽世界、我的世界。支持中文、英文、常见简称与格式归一化，未知名称提示未收录。
 - **图片问卷**：每轮 12 道题，覆盖协作、风险、节奏、贡献、探索、练习六个维度。三角洲使用专用情境题和官方图片，其他游戏沿用原问卷。
+- **推荐前的偏好解读**：结合已有 MBTI 自我描述、问卷方向和实际条件，用连贯段落说明怎样走到当前推荐。中性或分散的回答会保留不确定性；主动选择位置、兵种或已随机英雄会明确注明。可展开原始题目与回答，切换条件时同步更新，下载报告保留完整解读。
 - **三角洲行动**：烽火地带优先，支持切换全面战场；四兵种、17 位干员、15 把枪械，结合交战距离、打法、练习投入、组队、平台与配装取向，提供解释、取舍、练习和原资料入口。S9、S10、S11 档案参考 ALWAYS聪聪本人 B站视频，保留枪管、套件和弹药条件，不把历史等级或未知平台评价套给当前选择。详见 [三角洲说明](docs/delta.md)。
 - **可选 MBTI**：默认只作备注；三角洲可主动开启最多 ±1.5 分的干员排序参考。这是编辑假设，不改变枪械、距离或模式资格。英雄联盟和其他游戏仍只备注。
 - **峡谷排位方案**：五个位置、20 位精选英雄，结合熟练度、操作投入、目标、组队、位置、玩法、地图关注与距离偏好，提供理由、摩擦点、练习和排位准备路线。切换位置后更新英雄与观摩对象。
@@ -60,6 +61,8 @@ web/delta.js         三角洲专用问卷、推荐规则和报告
 web/delta-operators.js 三角洲四兵种与17位干员
 web/delta-weapons.js 三角洲15枪、赛季来源与变体范围
 web/delta-visuals.js 三角洲背景、12题图和17干员头像
+web/preference-analysis.js 偏好解读、原回答证据与Markdown导出
+web/analysis-ui.js   推荐前的解读区渲染
 web/visuals.js       六款背景与12题图配置
 web/assets/          本地头像、背景与情境插画
 launch.mjs           后台启动、复用与就绪检查
@@ -77,6 +80,8 @@ docs/delta.md        三角洲推荐规则与资料维护方法
 ![三角洲行动首页](docs/delta-preview.png)
 
 [三角洲干员推荐](docs/delta-report.png) · [手机预览](docs/delta-mobile.png) · [三角洲实际导出示例](docs/delta-sample-report.md)
+
+[三角洲偏好解读](docs/preference-analysis-delta.png) · [英雄联盟偏好解读](docs/preference-analysis-lol.png)
 
 [问卷配图](docs/main-lab-question.png) · [乌迪尔双流派](docs/main-lab-hextech.png) · [实际导出示例](docs/sample-report.md)
 
